@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CMv3 API Help</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <img src="lumenlogo.png" alt="Lumen Logo" style="display: block; margin: 0 auto;">
+  <h1>CMv3 API Help</h1>
+  <div class="content">
+    <p>The API Request form is a simplification of the Lumen CMv3 API process, allowing users to gather information quickly. More features will be added as the API expands. The output is JSON formatted and readily styled for a copy-paste job back into the CMv3 platform.</p>
+
+    <p>All requests require an API Key and Secret combination. The API Key and Secret must be accessible to a CMv3 SubID.</p>
+
+    <p>All requests require at least a SubID to obtain a response. Requests that only need SubID:</p>
+    <ul>
+      <li>Origin Shield IPs</li>
+      <li>Edge IPs</li>
+      <li>Subscriber Current Configuration</li>
+      <li>Subscriber Candidate Configuration</li>
+      <li>Deleted Configuration IDs</li>
+      <li>Recent Transactions</li>
+    </ul>
+
+    <p>Some requests require other parameters such as Transaction ID or Config Name:</p>
+    <ul>
+      <li>Display Deleted Configuration: This requires the Configuration name obtained from the 'Deleted Configuration ID'</li>
+      <li>Transaction ID Details: This transaction ID is obtained from 'Recent Transactions'</li>
+    </ul>
+  </div>
+</body>
+</html>

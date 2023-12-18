@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CMv3 API Request Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    button[type="submit"] {
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #response {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    .copy-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background-color: #45a049;
+    }
+
+    .copy-button-container {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    .help-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 14px;
+      color: #0000FF;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <a href="help.html" class="help-link">Help</a>
+  <img src="lumenlogo.png" alt="Lumen Logo" style="display: block; margin: 0 auto;">
+  <h1>API Request Form</h1>
+  <form id="apiForm" action="make-api-request.php" method="post">
+    <label for="apiKeyID">API Key ID:</label>
+    <input type="text" id="apiKeyID" name="apiKeyID" required><br><br>
+
+    <label for="secret">Secret:</label>
+    <input type="password" id="secret" name="secret" required><br><br>
+
+    <label for="endpoint">API Endpoint:</label>
+    <select id="endpoint" name="endpoint">
+      <option value="/v1/serviceConfiguration/v3/subscribers/{subscriberId}/configs/production/current">Subscriber Current Configuration</option>
+      <option value="/v1/serviceConfiguration/v3/subscribers/{subscriberId}/configs/production/candidate">Subscriber Candidate Configuration</option>
+      <option value="/v1/serviceConfiguration/v3.1/subscribers/{subscriberId}/configs/deleted">Deleted Configurations IDs</option>
+      <option value="/v1/serviceConfiguration/v3.1/subscribers/{subscriberId}/configs/deleted/{configName}">Display Deleted Configuration (ID Required)</option>
+      <option value="/v1/serviceConfiguration/v3.1/subscribers/{subscriberId}">Subscriber Metadata</option>
+      <option value="/v1/serviceConfiguration/v3/subscribers/{subscriberId}/transactions">Recent Transactions</option>
+      <option value="/v1/serviceConfiguration/v3/subscribers/{subscriberId}/transactions/{transactionId}">Transaction ID Details</option>
+      <option value="/v1/networkConfiguration/v1/originShield/hosts">Origin Shield Hosts</option>
+      <option value="/v1/networkConfiguration/v1/edges/vips">Edge VIPs</option>
+    </select><br><br>
+
+    <label for="subscriberId">Subscriber ID:</label>
+    <input type="text" id="subscriberId" name="subscriberId"><br><br>
+    <label for="transactionId">Transaction ID:</label>
+    <input type="text" id="transactionId" name="transactionId"><br><br>
+    <label for="configName">Config Name:</label>
+    <input type="text" id="configName" name="configName"><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <div class="copy-button-container">
+    <button id="copyButton" class="copy-button" style="display: none;">Copy to Clipboard</button>
+  </div>
+
+  <div id="response"></div>
+
+  <script>
+    $(document).ready(function() {
+      $('#apiForm').submit(function(event) {
+        event.preventDefault();
+
+        var form = $(this);
+        var apiKeyID = form.find('#apiKeyID').val();
+        var secret = form.find('#secret').val();
+        var endpoint = form.find('#endpoint').val();
+        var subscriberId = form.find('#subscriberId').val();
+        var transactionId = form.find('#transactionId').val();
+        var configName = form.find('#configName').val();
+
+        var httpVerb = "GET";
+        var contentType = "application/json";
+        var relativePath = endpoint.replace('{subscriberId}', subscriberId).replace('{transactionId}', transactionId).replace('{configName}', configName);
+
+        var apiUrl = form.attr('action');
+
+        $.ajax({
+          url: apiUrl,
+          type: 'POST',
+          data: {
+            apiKeyID: apiKeyID,
+            secret: secret,
+            httpVerb: httpVerb,
+            contentType: contentType,
+            relativePath: relativePath
+          },
+          success: function(response) {
+            var formattedResponse = JSON.stringify(response, null, 2);
+            $('#response').html('<pre>' + formattedResponse + '</pre>');
+            $('#copyButton').show();
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            $('#response').text("Error: " + jqXHR.status + " " + errorThrown);
+          }
+        });
+      });
+
+      $('#copyButton').click(function() {
+        var responseText = $('#response').text();
+        copyToClipboard(responseText);
+        alert("Copied to clipboard!");
+      });
+
+      function copyToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+    });
+  </script>
+</body>
+</html>
